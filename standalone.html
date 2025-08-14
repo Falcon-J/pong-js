@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>3D Pong AI - Modern Game Experience</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        background: linear-gradient(135deg, #0a0a0a, #1a1a2e, #16213e);
+        font-family: "Orbitron", monospace;
+        overflow: hidden;
+        cursor: none;
+      }
+
+      #gameContainer {
+        position: relative;
+        width: 100vw;
+        height: 100vh;
+      }
+
+      #ui {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
+        z-index: 10;
+      }
+
+      #score {
+        position: absolute;
+        top: 50px;
+        left: 50%;
+        transform: translateX(-50%);
+        color: #00ff88;
+        font-size: 48px;
+        font-weight: 900;
+        text-shadow: 0 0 20px #00ff88;
+        letter-spacing: 10px;
+      }
+
+      #instructions {
+        position: absolute;
+        bottom: 50px;
+        left: 50%;
+        transform: translateX(-50%);
+        color: #66ccff;
+        font-size: 18px;
+        text-align: center;
+        text-shadow: 0 0 10px #66ccff;
+      }
+
+      #gameOver {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        color: #ff6666;
+        font-size: 72px;
+        font-weight: 900;
+        text-shadow: 0 0 30px #ff6666;
+        text-align: center;
+        display: none;
+        animation: pulse 2s infinite;
+      }
+
+      @keyframes pulse {
+        0%,
+        100% {
+          opacity: 1;
+        }
+        50% {
+          opacity: 0.7;
+        }
+      }
+
+      #startMenu {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        text-align: center;
+        color: #ffffff;
+        z-index: 20;
+      }
+
+      #startMenu h1 {
+        font-size: 72px;
+        font-weight: 900;
+        color: #00ff88;
+        text-shadow: 0 0 30px #00ff88;
+        margin-bottom: 30px;
+        animation: glow 2s ease-in-out infinite alternate;
+      }
+
+      @keyframes glow {
+        from {
+          text-shadow: 0 0 30px #00ff88;
+        }
+        to {
+          text-shadow: 0 0 50px #00ff88, 0 0 60px #00ff88;
+        }
+      }
+
+      #startButton {
+        background: linear-gradient(45deg, #00ff88, #00ccaa);
+        border: none;
+        padding: 20px 40px;
+        font-size: 24px;
+        font-family: "Orbitron", monospace;
+        font-weight: 700;
+        color: #000;
+        cursor: pointer;
+        border-radius: 10px;
+        transition: all 0.3s ease;
+        pointer-events: auto;
+        box-shadow: 0 0 20px rgba(0, 255, 136, 0.5);
+      }
+
+      #startButton:hover {
+        transform: scale(1.1);
+        box-shadow: 0 0 30px rgba(0, 255, 136, 0.8);
+      }
+
+      #performance {
+        position: absolute;
+        top: 20px;
+        right: 20px;
+        color: #66ccff;
+        font-size: 14px;
+        text-shadow: 0 0 5px #66ccff;
+      }
+
+      #error {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        color: #ff6666;
+        font-size: 24px;
+        text-align: center;
+        padding: 20px;
+        background: rgba(0, 0, 0, 0.8);
+        border-radius: 10px;
+        display: none;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="gameContainer">
+      <div id="startMenu">
+        <h1>3D PONG AI</h1>
+        <p style="margin-bottom: 30px; font-size: 18px; color: #66ccff">
+          Experience the future of classic gaming
+        </p>
+        <button id="startButton">START GAME</button>
+      </div>
+
+      <div id="ui">
+        <div id="score">0 : 0</div>
+        <div id="instructions">
+          Move mouse to control your paddle • First to 5 wins
+        </div>
+        <div id="gameOver">
+          <div id="gameOverText">GAME OVER</div>
+          <div style="font-size: 24px; margin-top: 20px">
+            Press R to restart
+          </div>
+        </div>
+        <div id="performance">FPS: <span id="fps">60</span></div>
+      </div>
+
+      <div id="error">
+        <h3>Loading...</h3>
+        <p>If this message persists, check the browser console for errors.</p>
+      </div>
+    </div>
+
+    <!-- Load Three.js from CDN -->
+    <script type="importmap">
+      {
+        "imports": {
+          "three": "https://unpkg.com/three@0.158.0/build/three.module.js"
+        }
+      }
+    </script>
+
+    <script type="module">
+      // Simple error handling
+      window.addEventListener("error", (e) => {
+        document.getElementById("error").style.display = "block";
+        document.getElementById("startMenu").style.display = "none";
+        console.error("Error:", e.error);
+      });
+
+      // Load the compiled TypeScript (you'll need to compile to JS first)
+      import("./dist/main.js").catch(() => {
+        // Fallback: try loading directly with dynamic import
+        import("./src/main.ts").catch((error) => {
+          document.getElementById("error").innerHTML = `
+                    <h3>Build Error</h3>
+                    <p>Please run: <code>npm run build</code> first, or use a development server.</p>
+                    <p>Error: ${error.message}</p>
+                `;
+        });
+      });
+    </script>
+  </body>
+</html>

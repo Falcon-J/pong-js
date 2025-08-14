@@ -1,0 +1,31 @@
+{
+  "name": "pong-3d-ai",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Modern 3D Pong game with AI opponent built with Three.js and TypeScript",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview",
+    "type-check": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@types/three": "^0.158.0",
+    "typescript": "^5.2.2",
+    "vite": "4.4.12"
+  },
+  "dependencies": {
+    "three": "^0.158.0"
+  },
+  "keywords": [
+    "pong",
+    "game",
+    "three.js",
+    "typescript",
+    "ai",
+    "3d"
+  ],
+  "author": "Your Name",
+  "license": "MIT"
+}
